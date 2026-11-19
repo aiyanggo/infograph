@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주봉 -5% 이하 하락 이후 다음 주 방향성 및 변동폭 통계 분석</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #F1F5F9;
+            color: #0F172A;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 380px;
+        }
+        .chart-container-wide {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 340px;
+            }
+            .chart-container-wide {
+                height: 360px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-600 selection:text-white">
+
+    <nav class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <span class="inline-block w-3 h-3 rounded-full bg-cyan-400"></span>
+                <span class="font-bold text-sm sm:text-base tracking-tight">MARKET TAIL-RISK ANALYTICS</span>
+            </div>
+            <div class="hidden md:flex space-x-6 text-xs font-medium text-slate-300">
+                <a href="#overview" class="hover:text-cyan-400 transition">핵심 지표</a>
+                <a href="#probability" class="hover:text-cyan-400 transition">상승·하락 확률</a>
+                <a href="#magnitude" class="hover:text-cyan-400 transition">변동폭 범위</a>
+                <a href="#horizon" class="hover:text-cyan-400 transition">기간별 궤적</a>
+                <a href="#methodology" class="hover:text-cyan-400 transition">캔들 해석 및 최근 사례</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-12 sm:py-16 px-4 sm:px-6 lg:px-8 border-b-4 border-blue-500">
+        <div class="max-w-7xl mx-auto">
+            <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-cyan-300 border border-cyan-400/30 mb-4">
+                S&P 500 장기 시계열(1980~2025) 및 최근 20년(2006~2025) 데이터 기반
+            </div>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight mb-4">
+                주봉 <span class="text-rose-400">-5% 이하</span> 급락 이후,<br class="hidden sm:inline"> 다음 주 시장은 어떻게 움직였는가?
+            </h1>
+            <p class="text-slate-300 text-base sm:text-lg max-w-3xl leading-relaxed">
+                주간 단위 -5% 이상의 극단적 하락이 발생한 직후, 다음 주의 양봉(상승)·음봉(하락) 전환 확률과 변동폭 상·하한 범위를 정밀 분석했습니다. 단기 기술적 반등의 통계적 우위와 그 이면에 숨겨진 연쇄 폭락(Tail Risk)의 비대칭성을 확인하십시오.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-14">
+
+        <section id="overview">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                    <span class="w-1.5 h-6 bg-blue-600 rounded-full"></span>
+                    핵심 요약 지표 (Key Performance Indicators)
+                </h2>
+                <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                    IBF(icfs.com)가 재구성한 S&P 500 주간 종가 수익률 데이터에서 최근 20년(2006~2025년) 동안 주간 -5% 이하 급락은 총 25회 관측되었습니다. 전체 46년 표본(41건) 중 61.0%가 최근 20년에 집중되어 있으며, 다음 주 반등 확률은 평상시를 상회하지만 극단적 하락폭이 상승폭을 압도하는 특징을 보입니다.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-600 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-blue-600">최근 20년 급락 빈도</span>
+                        <div class="text-4xl font-black text-slate-900 mt-2">25<span class="text-xl font-bold text-slate-500 ml-1">회</span></div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-4 pt-3 border-t border-slate-100">
+                        2006~2025년 기준 (1980~2025년 전체 41건의 61.0% 집중)
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-emerald-500 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">다음 주 상승 확률 (양봉 대용)</span>
+                        <div class="text-4xl font-black text-emerald-600 mt-2">65.9<span class="text-xl font-bold ml-0.5">%</span></div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-4 pt-3 border-t border-slate-100">
+                        전체 41건 중 27건 상승 마감 (평상시 57.1% 대비 +8.8%p 우위)
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-cyan-500 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-cyan-600">다음 주 수익률 중앙값</span>
+                        <div class="text-4xl font-black text-slate-900 mt-2">+1.44<span class="text-xl font-bold text-slate-500 ml-0.5">%</span></div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-4 pt-3 border-t border-slate-100">
+                        과매도에 따른 단기 기술적 반발 매수세 유입 반영
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-rose-500 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-rose-600">다음 주 극단적 변동폭 범위</span>
+                        <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
+                            <span class="text-rose-600">-18.2%</span> ~ <span class="text-emerald-600">+12.0%</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-4 pt-3 border-t border-slate-100">
+                        최악(-18.20%)이 최대 반등(+12.03%)을 상회하는 꼬리 위험
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="probability" class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                    <span class="w-1.5 h-6 bg-emerald-500 rounded-full"></span>
+                    1. 다음 주 방향성 분석: 단기 반등 우위와 표본 민감도
+                </h2>
+                <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                    주간 단위 -5% 이상의 충격이 발생한 다음 주에는 저가 매수세가 유입되며 상승 마감할 확률이 약 3분의 2에 달합니다. 아래 두 차트는 급락 직후 상승·하락 비율과 평상시 주간 상승 확률 간의 통계적 격차를 보여줍니다.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-lg font-bold text-slate-900">급락 직후 다음 주 상승 vs 하락 비율</h3>
+                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded bg-emerald-50 text-emerald-700">전체 41건 표본</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-600 mb-4">
+                            1980~2025년 S&P 500 기준 -5% 이하 하락 다음 주에 <strong>27건(65.9%)</strong>이 종가 기준 상승(양봉 대용)했으며, <strong>14건(34.1%)</strong>은 추가 하락(음봉 대용)했습니다.
+                        </p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="directionDonutChart"></canvas>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex justify-between">
+                        <span>상승(양봉 대용): 27주</span>
+                        <span>하락(음봉 대용): 14주</span>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-lg font-bold text-slate-900">평상시 대비 다음 주 상승 확률 비교</h3>
+                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded bg-blue-50 text-blue-700">+8.8%p 우위</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-600 mb-4">
+                            전체 2,399주의 평상시 주간 상승 확률(57.1%)과 비교할 때 급락 직후 상승 빈도가 뚜렷하게 높습니다. Bloomberg 데이터로 1990~2009년 구간을 대체 검증해도 <strong>67.5%(27/40건)</strong>로 일관된 우위를 유지합니다.
+                        </p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="benchmarkBarChart"></canvas>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500">
+                        핵심 시사점: 급락 직후에는 평균 회귀(Mean Reversion) 압력이 평상시보다 강하게 작동합니다.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="magnitude" class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                    <span class="w-1.5 h-6 bg-rose-500 rounded-full"></span>
+                    2. 양봉·음봉 대용 변동폭 범위 및 극단적 꼬리 위험
+                </h2>
+                <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                    25건 전수의 개별 하한(0% 근방 최소 변동폭)은 공개되지 않았으나, 1950년 이후 역대 주간 등락률 상위·하위 기록과 교차 대조한 결과 최근 20년(2006~2025년) 구간의 상·하한 극값이 모두 확인됩니다. 상승 시 최대폭보다 하락 시 최악폭이 훨씬 큰 비대칭 구조에 유의해야 합니다.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="bg-white rounded-xl shadow-md p-6 lg:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-lg font-bold text-slate-900">최근 20년 급락 직후 주요 극값 사례 (S&P 500)</h3>
+                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded bg-slate-100 text-slate-700">역대 기록 교차 검증</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-600 mb-4">
+                            1950년 이후 S&P 500 역사상 주간 상승률 3~6위 기록과 주간 하락률 1~2위 기록이 모두 최근 20년 내 직전 주 -5% 이상 급락 바로 다음 주에 발생했습니다.
+                        </p>
+                    </div>
+                    <div class="chart-container-wide">
+                        <canvas id="extremesBarChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6 flex flex-col justify-between space-y-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2">변동폭 범위 및 연속 폭락 경보</h3>
+                        <p class="text-xs text-slate-600 mb-4">
+                            확률은 상승(65.9%)이 높지만, 위기 국면에서는 2주 연속 -5% 이상 폭락이 연쇄적으로 출현했습니다.
+                        </p>
+
+                        <div class="space-y-4">
+                            <div class="p-4 rounded-lg bg-emerald-50 border border-emerald-200">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-xs font-bold text-emerald-800">양봉(상승) 대용 크기 범위</span>
+                                    <span class="text-sm font-black text-emerald-600">0% 초과 ~ +12.03%</span>
+                                </div>
+                                <div class="w-full bg-emerald-200/60 h-2.5 rounded-full overflow-hidden my-2">
+                                    <div class="bg-emerald-500 h-full rounded-full" style="width: 66%;"></div>
+                                </div>
+                                <p class="text-xs text-emerald-700">
+                                    중앙값 +1.44%를 중심으로 최대 2008년 11월 28일 주간(+12.03%)까지 확장
+                                </p>
+                            </div>
+
+                            <div class="p-4 rounded-lg bg-rose-50 border border-rose-200">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-xs font-bold text-rose-800">음봉(하락) 대용 크기 범위</span>
+                                    <span class="text-sm font-black text-rose-600">0% 미만 ~ -18.20%</span>
+                                </div>
+                                <div class="w-full bg-rose-200/60 h-2.5 rounded-full overflow-hidden my-2">
+                                    <div class="bg-rose-600 h-full rounded-full" style="width: 100%;"></div>
+                                </div>
+                                <p class="text-xs text-rose-700">
+                                    2008년 10월 10일 주간(-18.20%) 및 2020년 3월 20일 주간(-14.98%) 연쇄 투매
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-lg bg-slate-900 text-white">
+                        <div class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">
+                            최근 20년 2주 연속 -5% 이하 급락 군집 (총 4회)
+                        </div>
+                        <ul class="text-xs space-y-1.5 text-slate-300">
+                            <li class="flex justify-between"><span>2008년 10월 금융위기</span><span class="font-mono text-rose-400">10/03 → 10/10</span></li>
+                            <li class="flex justify-between"><span>2008년 11월 신용경색</span><span class="font-mono text-rose-400">11/14 → 11/21</span></li>
+                            <li class="flex justify-between"><span>2020년 3월 팬데믹 충격</span><span class="font-mono text-rose-400">03/13 → 03/20</span></li>
+                            <li class="flex justify-between"><span>2022년 6월 인플레 긴축</span><span class="font-mono text-rose-400">06/10 → 06/17</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="horizon" class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                    <span class="w-1.5 h-6 bg-cyan-500 rounded-full"></span>
+                    3. 기간 경과별 회복 궤적 및 최근 20년 연도별 분포
+                </h2>
+                <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                    급락 직후 1주 차의 단기 반등이 곧바로 완전한 추세 전환을 의미하지는 않습니다. 4주 후에는 상승 확률이 오히려 61.0%로 소폭 낮아지며 재차 저점을 시험하는 과정을 거친 뒤, 12주 및 52주 후에 장기 평균 회복 궤도에 진입합니다.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-lg font-bold text-slate-900">급락 이후 보유 기간별 상승 확률 및 중앙값</h3>
+                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded bg-cyan-50 text-cyan-700">1주 ~ 52주 추적</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-600 mb-4">
+                            1주 후 상승 확률 65.9%(중앙값 +1.44%)에서 <strong>4주 후 61.0%(+2.09%)</strong>로 변동성 재확대 구간을 거친 후, 12주 후 78.0%(+7.15%), 52주 후 77.5%(+18.81%)로 상승합니다.
+                        </p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="horizonComboChart"></canvas>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500">
+                        주의: 4주 후 최악 수익률은 -19.50%, 52주 후 최악 수익률은 -35.85%를 기록했습니다.
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-lg font-bold text-slate-900">최근 20년(2006~2025) 연도별 급락 발생 빈도</h3>
+                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded bg-blue-50 text-blue-700">총 25주 분포</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-600 mb-4">
+                            주간 -5% 이하 급락은 평온한 상승장에서는 수년간 전혀 나타나지 않다가, 2008년(6회), 2020년(4회), 2018년(3회), 2022년(3회) 등 거시적 위기 국면에 집중 군집합니다.
+                        </p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="yearlyClusterChart"></canvas>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500">
+                        2006~2007, 2012~2014, 2017, 2019, 2021, 2023~2024년은 0회 발생.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="methodology" class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                    <span class="w-1.5 h-6 bg-amber-500 rounded-full"></span>
+                    4. 주봉 캔들 해석 시 유의점 및 2026년 최근 사례 비교
+                </h2>
+                <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                    통계 산출 기준인 주간 종가 수익률(Close-to-Close)과 차트상 주봉 캔들(Open-to-Close)의 차이를 명확히 이해해야 합니다. 또한 장기 통계가 부재한 코스피·나스닥의 경우 2026년 최근 급락 사례에서 상반된 다음 주 흐름이 관측되었습니다.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">주간 종가 등락률 vs 주봉 캔들 몸통(양봉·음봉) 괴리 메커니즘</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+                    <div class="p-4 rounded-lg bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                        <div>
+                            <div class="text-xs font-bold text-blue-600 mb-1">STEP 1. 직전 주 급락 마감</div>
+                            <div class="font-bold text-slate-900 text-sm mb-2">금요일 종가 -5% 이상 폭락</div>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                주말 동안 악재가 해소되지 않으면 투자 심리가 극도로 위축된 상태로 다음 주 월요일 개장을 맞이합니다.
+                            </p>
+                        </div>
+                        <div class="mt-3 text-xs font-mono bg-white p-2 rounded border border-slate-200 text-slate-700">
+                            기준점: 전주 금요일 종가 (100)
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-lg bg-amber-50 border border-amber-200 flex flex-col justify-between">
+                        <div>
+                            <div class="text-xs font-bold text-amber-700 mb-1">STEP 2. 월요일 시가 갭하락 발생</div>
+                            <div class="font-bold text-slate-900 text-sm mb-2">시가 94 출발 → 금요일 종가 98 마감</div>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                월요일 시가가 전주 종가보다 크게 낮게 출발한 뒤 주중 반등하여 시가보다 높게 마감하는 경우 두 지표가 엇갈립니다.
+                            </p>
+                        </div>
+                        <div class="mt-3 text-xs font-mono bg-white p-2 rounded border border-amber-200 text-amber-800">
+                            월요일 시가(94) &lt; 금요일 종가(98) &lt; 전주 종가(100)
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-lg bg-slate-900 text-white flex flex-col justify-between">
+                        <div>
+                            <div class="text-xs font-bold text-cyan-400 mb-1">STEP 3. 지표별 상반된 판정 결과</div>
+                            <div class="font-bold text-white text-sm mb-2">차트는 양봉, 수익률 통계는 하락</div>
+                            <ul class="text-xs text-slate-300 space-y-1.5 mt-2">
+                                <li><span class="text-emerald-400 font-bold">[캔들 차트]</span> 시가(94) 대비 종가(98) 상승 → <strong>양봉(+4.26%)</strong></li>
+                                <li><span class="text-rose-400 font-bold">[종가 통계]</span> 전주(100) 대비 종가(98) 하락 → <strong>하락(-2.00%)</strong></li>
+                            </ul>
+                        </div>
+                        <div class="mt-3 text-xs text-slate-400 border-t border-slate-700 pt-2">
+                            순수 캔들 통계는 별도 주간 OHLC 데이터 추출이 필수적입니다.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-emerald-500">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="text-xs font-bold text-emerald-600 uppercase">2026년 11월 국내 증시 사례</span>
+                            <h4 class="text-lg font-bold text-slate-900 mt-0.5">코스피 급락 후 강한 반등 시현</h4>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">반등 성공</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-600 mb-4">
+                        코스피는 2026년 11월 2~6일 주간 <strong>-11.71%</strong>(5,730.74 → 5,059.69) 급락했으나, 바로 다음 주(11월 9~13일)에 <strong>+4.56%</strong>(코스닥 약 +8.6%) 반등 마감하며 단기 복원력을 보였습니다.
+                    </p>
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="p-3 rounded bg-rose-50">
+                            <div class="text-xs text-slate-500">충격 주간 (11/02~06)</div>
+                            <div class="text-xl font-black text-rose-600">-11.71%</div>
+                        </div>
+                        <div class="p-3 rounded bg-emerald-50">
+                            <div class="text-xs text-slate-500">다음 주간 (11/09~13)</div>
+                            <div class="text-xl font-black text-emerald-600">+4.56%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-rose-500">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="text-xs font-bold text-rose-600 uppercase">2026년 10월 미국 기술주 사례</span>
+                            <h4 class="text-lg font-bold text-slate-900 mt-0.5">나스닥 하락 이후 약세 연장</h4>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">추가 하락</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-600 mb-4">
+                        나스닥 100 지수가 2026년 10월 16일 마감 주간에 약 <strong>-5.5%</strong>(나스닥 종합 -4.48%) 하락한 이후, 다음 주인 10월 19~23일 주간에도 나스닥 종합지수가 <strong>-0.71%</strong> 내리며 약세를 이어갔습니다.
+                    </p>
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="p-3 rounded bg-rose-50">
+                            <div class="text-xs text-slate-500">충격 주간 (나스닥 100)</div>
+                            <div class="text-xl font-black text-rose-600">-5.50%</div>
+                        </div>
+                        <div class="p-3 rounded bg-rose-50">
+                            <div class="text-xs text-slate-500">다음 주간 (나스닥 종합)</div>
+                            <div class="text-xl font-black text-rose-600">-0.71%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-8 px-4 sm:px-6 lg:px-8 mt-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
+            <div>
+                <p class="font-semibold text-slate-200">데이터 출처 및 분석 기준 안내</p>
+                <p class="mt-1">S&P 500 주간 수익률(1980~2025년 IBF 재구성 데이터, Dave Manuel 역대 주간 등락률 아카이브) 및 2026년 시장 리뷰 종합</p>
+            </div>
+            <div class="text-slate-500">
+                투자 전략 수립 시 분할 진입 및 꼬리 위험 관리 병행 권고
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function wrapLabel(label) {
+            if (typeof label !== 'string' || label.length <= 16) {
+                return label;
+            }
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+
+            words.forEach(word => {
+                if ((currentLine + (currentLine ? ' ' : '') + word).length <= 16) {
+                    currentLine += (currentLine ? ' ' : '') + word;
+                } else {
+                    if (currentLine) {
+                        lines.push(currentLine);
+                    }
+                    currentLine = word;
+                }
+            });
+            if (currentLine) {
+                lines.push(currentLine);
+            }
+            return lines;
+        }
+
+        const sharedTooltipConfig = {
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    } else {
+                        return label;
+                    }
+                }
+            }
+        };
+
+        const donutLabels = [
+            '다음 주 상승 마감 (양봉 대용 27건)',
+            '다음 주 하락 마감 (음봉 대용 14건)'
+        ].map(wrapLabel);
+
+        new Chart(document.getElementById('directionDonutChart'), {
+            type: 'doughnut',
+            data: {
+                labels: donutLabels,
+                datasets: [{
+                    data: [65.9, 34.1],
+                    backgroundColor: ['#10B981', '#F43F5E'],
+                    borderColor: '#FFFFFF',
+                    borderWidth: 3,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '62%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { family: "'Noto Sans KR', sans-serif", size: 12 },
+                            padding: 16
+                        }
+                    },
+                    tooltip: sharedTooltipConfig
+                }
+            }
+        });
+
+        const benchmarkLabels = [
+            '평상시 전체 주간 상승 비율 (2,399주)',
+            '급락 직후 다음 주 상승 비율 (IBF 41건)',
+            '급락 직후 다음 주 상승 비율 (Bloomberg 40건)'
+        ].map(wrapLabel);
+
+        new Chart(document.getElementById('benchmarkBarChart'), {
+            type: 'bar',
+            data: {
+                labels: benchmarkLabels,
+                datasets: [{
+                    label: '상승 확률 (%)',
+                    data: [57.1, 65.9, 67.5],
+                    backgroundColor: ['#94A3B8', '#2563EB', '#06B6D4'],
+                    borderRadius: 6,
+                    barThickness: 42
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 80,
+                        ticks: {
+                            callback: value => value + '%'
+                        },
+                        grid: { color: '#E2E8F0' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: sharedTooltipConfig
+                }
+            }
+        });
+
+        const extremeLabels = [
+            '2008.11.28 주간 (최대 반등)',
+            '2009.03.13 주간 (금융위기 바닥)',
+            '2008.10.31 주간 (단기 급반등)',
+            '2020.03.27 주간 (팬데믹 반등)',
+            '전체 41건 다음 주 수익률 중앙값',
+            '2020.03.20 주간 (팬데믹 투매)',
+            '2008.10.10 주간 (역대 최악 폭락)'
+        ].map(wrapLabel);
+
+        const extremeValues = [12.03, 10.71, 10.49, 10.26, 1.44, -14.98, -18.20];
+        const extremeColors = extremeValues.map(v => v >= 5 ? '#10B981' : (v > 0 ? '#06B6D4' : '#F43F5E'));
+
+        new Chart(document.getElementById('extremesBarChart'), {
+            type: 'bar',
+            data: {
+                labels: extremeLabels,
+                datasets: [{
+                    label: '다음 주 수익률 (%)',
+                    data: extremeValues,
+                    backgroundColor: extremeColors,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        min: -22,
+                        max: 16,
+                        ticks: {
+                            callback: value => (value > 0 ? '+' : '') + value + '%'
+                        },
+                        grid: { color: '#E2E8F0' }
+                    },
+                    y: {
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: sharedTooltipConfig
+                }
+            }
+        });
+
+        const horizonLabels = [
+            '1주 후 (다음 주)',
+            '4주 후 (1개월 경과)',
+            '12주 후 (1분기 경과)',
+            '52주 후 (1년 경과)'
+        ].map(wrapLabel);
+
+        new Chart(document.getElementById('horizonComboChart'), {
+            type: 'bar',
+            data: {
+                labels: horizonLabels,
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: '상승 확률 (%)',
+                        data: [65.9, 61.0, 78.0, 77.5],
+                        backgroundColor: 'rgba(37, 99, 235, 0.85)',
+                        borderRadius: 6,
+                        yAxisID: 'y',
+                        order: 2
+                    },
+                    {
+                        type: 'line',
+                        label: '수익률 중앙값 (%)',
+                        data: [1.44, 2.09, 7.15, 18.81],
+                        borderColor: '#06B6D4',
+                        backgroundColor: '#06B6D4',
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        tension: 0.25,
+                        yAxisID: 'y1',
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        position: 'left',
+                        min: 0,
+                        max: 100,
+                        ticks: { callback: v => v + '%' },
+                        grid: { color: '#E2E8F0' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        position: 'right',
+                        min: 0,
+                        max: 25,
+                        ticks: { callback: v => '+' + v + '%' },
+                        grid: { drawOnChartArea: false }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { family: "'Noto Sans KR', sans-serif", size: 11 } }
+                    },
+                    tooltip: sharedTooltipConfig
+                }
+            }
+        });
+
+        const yearlyLabels = [
+            '2008년 (금융위기)',
+            '2020년 (팬데믹)',
+            '2018년 (무역갈등)',
+            '2022년 (금리인상)',
+            '2009년',
+            '2010년',
+            '2011년',
+            '2015년',
+            '2016년',
+            '2025년'
+        ].map(wrapLabel);
+
+        new Chart(document.getElementById('yearlyClusterChart'), {
+            type: 'bar',
+            data: {
+                labels: yearlyLabels,
+                datasets: [{
+                    label: '-5% 이하 주간 급락 횟수',
+                    data: [6, 4, 3, 3, 2, 2, 2, 1, 1, 1],
+                    backgroundColor: [
+                        '#F43F5E',
+                        '#FB7185',
+                        '#2563EB',
+                        '#2563EB',
+                        '#3B82F6',
+                        '#3B82F6',
+                        '#3B82F6',
+                        '#94A3B8',
+                        '#94A3B8',
+                        '#94A3B8'
+                    ],
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 7,
+                        ticks: { stepSize: 1, callback: v => v + '회' },
+                        grid: { color: '#E2E8F0' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11 } }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: sharedTooltipConfig
+                }
+            }
+        });
+    </script>
+</body>
+</html>
