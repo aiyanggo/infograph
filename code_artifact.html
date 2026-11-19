@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>엔비디아(NVDA) 핵심 지지·저항선 및 향후 주가 시나리오</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #F0F4F8;
+            color: #0B192C;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 420px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 380px;
+            }
+        }
+        .chart-container-tall {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 500px;
+        }
+        @media (min-width: 768px) {
+            .chart-container-tall {
+                height: 460px;
+            }
+        }
+        .glass-card {
+            background: #FFFFFF;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(11, 25, 44, 0.08), 0 8px 10px -6px rgba(11, 25, 44, 0.04);
+            border: 1px solid rgba(0, 102, 255, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(11, 25, 44, 0.12), 0 8px 10px -6px rgba(11, 25, 44, 0.06);
+        }
+        .gradient-header {
+            background: linear-gradient(135deg, #0B192C 0%, #003380 50%, #0066FF 100%);
+        }
+        .badge-pulse {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 51, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0); }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-[#0066FF] selection:text-white">
+
+    <nav class="sticky top-0 z-50 bg-[#0B192C]/95 backdrop-blur-md text-white border-b border-white/10 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14">
+                <div class="flex items-center space-x-2">
+                    <span class="inline-block w-3 h-3 rounded-full bg-[#00E5FF]"></span>
+                    <span class="font-bold tracking-tight text-sm sm:text-base">NVDA EQUITY BRIEF</span>
+                    <span class="hidden sm:inline-block text-xs text-[#00E5FF] bg-[#0066FF]/30 px-2 py-0.5 rounded-full">2026.11.19 마감 기준</span>
+                </div>
+                <div class="flex space-x-3 sm:space-x-6 text-xs sm:text-sm font-medium overflow-x-auto">
+                    <a href="#section-overview" class="hover:text-[#00E5FF] transition-colors whitespace-nowrap">핵심 지표</a>
+                    <a href="#section-drivers" class="hover:text-[#00E5FF] transition-colors whitespace-nowrap">급락 원인</a>
+                    <a href="#section-levels" class="hover:text-[#00E5FF] transition-colors whitespace-nowrap">지지·저항 맵</a>
+                    <a href="#section-valuation" class="hover:text-[#00E5FF] transition-colors whitespace-nowrap">밸류에이션</a>
+                    <a href="#section-scenarios" class="hover:text-[#00E5FF] transition-colors whitespace-nowrap">향후 시나리오</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="gradient-header text-white py-12 sm:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-xs sm:text-sm font-semibold text-[#00E5FF] mb-4 border border-[#00E5FF]/30">
+                <span>⚡ 52주 신저가 경신 및 극단적 과매도 국면 진단</span>
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight mb-4">
+                엔비디아(NVDA) 핵심 지지·저항선<br class="hidden sm:block"> 및 향후 3~6개월 주가 시나리오
+            </h1>
+            <p class="text-base sm:text-lg text-blue-100 max-w-3xl leading-relaxed font-light">
+                역대급 Q3 FY27 어닝 서프라이즈에도 불구하고 거버넌스 공백, 워싱턴 규제 압박, 마진 피크아웃 우려, 국채금리 5% 돌파가 겹치며 사상 최고가 대비 40% 급락했습니다. 옵션 감마(GEX)와 밸류에이션이 충돌하는 변곡점의 핵심 가격대와 시나리오를 분석합니다.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
+
+        <section id="section-overview" class="scroll-mt-20">
+            <div class="mb-6">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B192C] flex items-center gap-2">
+                    <span class="text-[#0066FF]">01.</span> 현재 시장 좌표 및 핵심 KPI 요약
+                </h2>
+                <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                    2026년 10월 6일 장중 최고가($243.37) 이후 불과 6주 만에 시가총액의 40%가 증발했습니다. 현재 주가는 기술적 극단적 과매도(일간 RSI 19.64)와 음의 감마(-$869K) 수급 압력이 정면으로 충돌하는 최전선 방어 구간($144.00~$145.70) 위에 놓여 있습니다.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="glass-card p-6 border-l-4 border-l-[#FF3366]">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">11/19 정규장 종가</span>
+                        <span class="bg-[#FF3366]/10 text-[#FF3366] text-xs font-bold px-2 py-0.5 rounded badge-pulse">고점 대비 -40.0%</span>
+                    </div>
+                    <div class="mt-3 flex items-baseline gap-2">
+                        <span class="text-3xl sm:text-4xl font-black text-[#0B192C]">$145.98</span>
+                        <span class="text-xs text-slate-500">장후 $144.66</span>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-600">장중 저점 $145.71 기록, 52주 신저가 경신 (10/6 고점 $243.37)</p>
+                </div>
+
+                <div class="glass-card p-6 border-l-4 border-l-[#0066FF]">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">최전방 1차 지지선 (S1)</span>
+                        <span class="bg-[#0066FF]/10 text-[#0066FF] text-xs font-bold px-2 py-0.5 rounded">Put Wall $145</span>
+                    </div>
+                    <div class="mt-3">
+                        <span class="text-2xl sm:text-3xl font-black text-[#0066FF]">$144.0 – $145.7</span>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-600">종가 이탈 시 딜러 헤징 매도 출회로 2차 지지($135~$138) 테스트</p>
+                </div>
+
+                <div class="glass-card p-6 border-l-4 border-l-[#00E5FF]">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">단기 1차 저항선 (R1)</span>
+                        <span class="bg-cyan-50 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded">Gamma Flip $149.26</span>
+                    </div>
+                    <div class="mt-3">
+                        <span class="text-2xl sm:text-3xl font-black text-[#0B192C]">$148.8 – $153.5</span>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-600">11/12 전저점 및 Call Wall($150) 위치, 돌파 시 숏커버링 유발</p>
+                </div>
+
+                <div class="glass-card p-6 border-l-4 border-l-[#10B981]">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">FY28 선행 PER / 자사주</span>
+                        <span class="bg-emerald-50 text-emerald-700 text-xs font-bold px-2 py-0.5 rounded">극단적 저평가</span>
+                    </div>
+                    <div class="mt-3 flex items-baseline gap-2">
+                        <span class="text-3xl sm:text-4xl font-black text-[#10B981]">9.3x</span>
+                        <span class="text-xs font-semibold text-slate-600">잔여 매입 $2,273억</span>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-600">3년 PER 중앙값(49.0x) 대비 대폭 할인, 시총 6.4% 소각 여력</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-drivers" class="scroll-mt-20">
+            <div class="mb-6">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B192C] flex items-center gap-2">
+                    <span class="text-[#0066FF]">02.</span> 주가 붕괴의 구조적 배경: 어닝 서프라이즈 vs 4중 외생 악재
+                </h2>
+                <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                    Q3 FY27 매출($1,158억, YoY +103%)과 Q4 가이던스($1,300억) 모두 월가 컨센서스를 압도했으나, 펀더멘털 외적인 4가지 충격파가 동시에 덮치며 밸류에이션 멀티플을 강제로 압축시켰습니다.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-5 glass-card p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-[#0B192C]">펀더멘털 호조 vs 주가 괴리 (Q3 FY27 실적)</h3>
+                        <p class="text-xs text-slate-500 mt-1 mb-4">컨센서스 상회 실적에도 불구하고 매출총이익률(GM) 300bp 하락 가이던스가 빌미를 제공</p>
+                        <div class="chart-container">
+                            <canvas id="earningsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="mt-4 bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs text-slate-700">
+                        <strong class="text-[#0066FF]">핵심 시사점:</strong> Q3 데이터센터 매출은 $1,076억(YoY +110%)을 기록했으나, 다년 메모리 약정 급증($2,790억→$3,900억)과 베라 루빈 램프업으로 Q4 매출총이익률이 74.8%에서 <strong>71.0~72.0%</strong>로 낮아지며 수익성 피크아웃 우려를 자극했습니다.
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 glass-card p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-[#0B192C] mb-1">주가를 끌어내린 4대 구조적 악재 메커니즘</h3>
+                        <p class="text-xs text-slate-500 mb-5">외생 변수 복합 충돌에 따른 투자심리 냉각 및 멀티플 디레이팅 경로</p>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="p-4 rounded-xl bg-gradient-to-br from-rose-50 to-white border border-rose-200">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="w-6 h-6 rounded-full bg-[#FF3366] text-white text-xs font-bold flex items-center justify-center">1</span>
+                                    <h4 class="font-bold text-sm text-[#0B192C]">젠슨 황 사임 & 리더십 공백</h4>
+                                </div>
+                                <p class="text-xs text-slate-600 leading-relaxed">
+                                    11/12 전격 사임 및 복귀 배제 선언. 콜레트 크레스 임시 CEO 체제 돌입했으나 후임 타임라인 부재로 무디스 신용전망 하향('긍정적'→'안정적').
+                                </p>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-gradient-to-br from-amber-50 to-white border border-amber-200">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="w-6 h-6 rounded-full bg-[#FF8800] text-white text-xs font-bold flex items-center justify-center">2</span>
+                                    <h4 class="font-bold text-sm text-[#0B192C]">워싱턴 전방위 조사 & 수출통제</h4>
+                                </div>
+                                <p class="text-xs text-slate-600 leading-relaxed">
+                                    SEC 공시 적정성 조사, DOJ 수사, 상무부 12개국 원격 AI 컴퓨팅 차단 규정(11/16), 하원 외교위 대중 라이선스 340만 개 내역 공개 압박.
+                                </p>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-white border border-blue-200">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="w-6 h-6 rounded-full bg-[#0066FF] text-white text-xs font-bold flex items-center justify-center">3</span>
+                                    <h4 class="font-bold text-sm text-[#0B192C]">Q4 매출총이익률 71~72% 압박</h4>
+                                </div>
+                                <p class="text-xs text-slate-600 leading-relaxed">
+                                    3분기(74.8%) 대비 약 300bp 마진 축소 예고. HBM·메모리 조달 단가 상승과 신형 아키텍처 초기 양산 비용이 매출 성장 빛을 바래게 함.
+                                </p>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-200">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="w-6 h-6 rounded-full bg-[#0B192C] text-white text-xs font-bold flex items-center justify-center">4</span>
+                                    <h4 class="font-bold text-sm text-[#0B192C]">국채금리 5% & 빅테크 FCF 적자</h4>
+                                </div>
+                                <p class="text-xs text-slate-600 leading-relaxed">
+                                    미 10년물 금리 5.06~5.15% 돌파. 빅5 하이퍼스케일러 중 MSFT 제외 4곳(AMZN·ORCL·GOOGL·META)이 Q3 잉여현금흐름 적자를 기록하며 CapEx 피로감 노출.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-4 border-t border-slate-100">
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+                            <span class="font-bold text-[#0B192C]">빅5 하이퍼스케일러 Q3 CapEx / 영업현금흐름(OCF) 비율:</span>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-2 py-1 rounded bg-emerald-100 text-emerald-800 font-semibold">MSFT 67.9% (흑자)</span>
+                                <span class="px-2 py-1 rounded bg-rose-100 text-rose-800 font-semibold">META 103.5%</span>
+                                <span class="px-2 py-1 rounded bg-rose-100 text-rose-800 font-semibold">GOOGL 121.4%</span>
+                                <span class="px-2 py-1 rounded bg-rose-100 text-rose-800 font-semibold">ORCL 123.4%</span>
+                                <span class="px-2 py-1 rounded bg-rose-100 text-rose-800 font-semibold">AMZN 182.1%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-levels" class="scroll-mt-20">
+            <div class="mb-6">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B192C] flex items-center gap-2">
+                    <span class="text-[#0066FF]">03.</span> 핵심 지지선·저항선 맵 & 옵션 감마(GEX) 구조
+                </h2>
+                <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                    일평균 변동폭(ATR)이 약 $9.7~$9.9(6.6%)에 달하므로 단일 가격보다 구간(Zone) 대응이 필수적입니다. 현재 주가는 음의 감마(-$869K) 영역에 갇혀 있어 $145.00 Put Wall 방어 여부가 단기 변동성 방향을 결정합니다.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 glass-card p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-[#0B192C]">지지선(S1~S4) 및 저항선(R1~R5) 가격 계층 구조</h3>
+                        <p class="text-xs text-slate-500 mt-1 mb-4">현재가($145.98) 기준 상단 매물 저항 벽과 하단 기술적·밸류에이션 완충 구간 (단위: USD)</p>
+                        <div class="chart-container-tall">
+                            <canvas id="levelsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="mt-4 grid grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 rounded-lg bg-rose-50 border border-rose-200">
+                            <span class="font-bold text-[#FF3366] block mb-1">▲ 상단 핵심 관문 (R1 → R4)</span>
+                            직전 지지선($148.80)과 Gamma Flip($149.26)이 저항으로 전환됨. $200~$210 구간에는 200일선 및 2026년 거래일의 39% 매물이 집중.
+                        </div>
+                        <div class="p-3 rounded-lg bg-blue-50 border border-blue-200">
+                            <span class="font-bold text-[#0066FF] block mb-1">▼ 하단 방어선 (S1 → S4)</span>
+                            $144~$145.7 이탈 시 볼린저 하단($135~$138)과 순수 DCF 약세 공정가치($128~$132.5)가 순차적 저가 매수 유입 구간.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 glass-card p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-[#0B192C]">행사가별 옵션 감마 노출(GEX) 및 기술적 지표</h3>
+                        <p class="text-xs text-slate-500 mt-1 mb-4">$145 이하 음의 감마 집중으로 하락 시 딜러의 기계적 현물 매도 압력 존재</p>
+                        <div class="chart-container">
+                            <canvas id="gexChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 space-y-2.5">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">주요 기술적 지표 스냅샷 (11/19 기준)</h4>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="p-2.5 bg-slate-50 rounded border border-slate-200 flex justify-between items-center">
+                                <span class="text-slate-600">일간 RSI(14)</span>
+                                <span class="font-black text-[#FF3366]">19.64 (극단 과매도)</span>
+                            </div>
+                            <div class="p-2.5 bg-slate-50 rounded border border-slate-200 flex justify-between items-center">
+                                <span class="text-slate-600">주간 RSI(14)</span>
+                                <span class="font-black text-[#FF8800]">27.64 (과매도 진입)</span>
+                            </div>
+                            <div class="p-2.5 bg-slate-50 rounded border border-slate-200 flex justify-between items-center">
+                                <span class="text-slate-600">20일 / 200일 SMA</span>
+                                <span class="font-bold text-[#0B192C]">$185.7 / $203.3</span>
+                            </div>
+                            <div class="p-2.5 bg-slate-50 rounded border border-slate-200 flex justify-between items-center">
+                                <span class="text-slate-600">월간 Max Pain</span>
+                                <span class="font-bold text-[#0066FF]">$180 (11/20 만기)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-valuation" class="scroll-mt-20">
+            <div class="mb-6">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B192C] flex items-center gap-2">
+                    <span class="text-[#0066FF]">04.</span> 펀더멘털 밸류에이션 괴리 및 자본 여력
+                </h2>
+                <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                    주가 급락으로 엔비디아의 FY2028 선행 PER은 9.3배까지 떨어져 경쟁사(AMD 30.1배, 브로드컴 24.6배) 및 S&P 500 평균(20.0배)의 절반 이하로 압축되었습니다. 월가 평균 목표주가($255.90)와의 괴리율은 +75%에 달합니다.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card p-6">
+                    <h3 class="text-lg font-bold text-[#0B192C]">글로벌 빅테크·반도체 선행 PER 멀티플 비교</h3>
+                    <p class="text-xs text-slate-500 mt-1 mb-4">FY2028 컨센서스 EPS($15.54~$15.75) 기준 엔비디아의 극단적 저평가 상태</p>
+                    <div class="chart-container">
+                        <canvas id="valuationChart"></canvas>
+                    </div>
+                    <p class="mt-3 text-xs text-slate-600">
+                        * 과거 3년 엔비디아 TTM PER 중앙값은 <strong>49.0배</strong>, 5년 평균은 <strong>36.0배</strong>였으며 현재 TTM PER 역시 15.7배로 역사적 하단입니다.
+                    </p>
+                </div>
+
+                <div class="glass-card p-6">
+                    <h3 class="text-lg font-bold text-[#0B192C]">월가 목표주가 분포 및 재무 방어력</h3>
+                    <p class="text-xs text-slate-500 mt-1 mb-4">최근 목표가 하향 조정에도 컨센서스 평균은 현 주가 대비 +69~82% 상단 위치</p>
+                    <div class="chart-container">
+                        <canvas id="targetPriceChart"></canvas>
+                    </div>
+                    <div class="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
+                        <div class="p-2 bg-blue-50 rounded-lg">
+                            <span class="block text-slate-500">보유 현금성 자산</span>
+                            <span class="font-black text-sm text-[#0B192C]">$980억</span>
+                        </div>
+                        <div class="p-2 bg-blue-50 rounded-lg">
+                            <span class="block text-slate-500">순현금 (부채 차감)</span>
+                            <span class="font-black text-sm text-[#0066FF]">$590억</span>
+                        </div>
+                        <div class="p-2 bg-emerald-50 rounded-lg">
+                            <span class="block text-slate-500">잔여 자사주 한도</span>
+                            <span class="font-black text-sm text-[#10B981]">$2,273억</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-scenarios" class="scroll-mt-20">
+            <div class="mb-6">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0B192C] flex items-center gap-2">
+                    <span class="text-[#0066FF]">05.</span> 향후 3~6개월 주가 시나리오 및 대응 로드맵
+                </h2>
+                <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                    향후 주가는 거버넌스 안정, 워싱턴 규제·의회 증언 결과, 12월 FOMC 금리 결정 및 빅테크 CapEx 가이던스에 따라 3가지 경로로 분기됩니다.
+                </p>
+            </div>
+
+            <div class="glass-card p-6 mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-[#0B192C]">시나리오별 주가 예상 밴드 및 확률 분포 (Plotly 분석)</h3>
+                        <p class="text-xs text-slate-500">현재가($145.98) 기준 각 시나리오의 목표 가격 범위 및 적용 FY28E 선행 PER 배수</p>
+                    </div>
+                    <div class="mt-2 sm:mt-0 flex gap-3 text-xs font-bold">
+                        <span class="flex items-center gap-1 text-[#0066FF]"><span class="w-2.5 h-2.5 rounded-full bg-[#0066FF]"></span>기본 50%</span>
+                        <span class="flex items-center gap-1 text-[#10B981]"><span class="w-2.5 h-2.5 rounded-full bg-[#10B981]"></span>강세 25%</span>
+                        <span class="flex items-center gap-1 text-[#FF3366]"><span class="w-2.5 h-2.5 rounded-full bg-[#FF3366]"></span>약세 25%</span>
+                    </div>
+                </div>
+                <div id="plotlyScenarioChart" class="w-full h-[340px]"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="glass-card p-6 border-t-4 border-t-[#0066FF] flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="px-2.5 py-1 rounded-full bg-[#0066FF] text-white text-xs font-bold">기본 시나리오 (50%)</span>
+                            <span class="text-xs font-bold text-slate-500">PER 8.6x – 11.9x</span>
+                        </div>
+                        <h4 class="text-xl font-black text-[#0B192C] mb-1">$135 – $185 박스권 회복</h4>
+                        <p class="text-xs text-[#0066FF] font-semibold mb-4">거버넌스·규제 소화 후 저점 다지기</p>
+                        <ul class="space-y-2 text-xs text-slate-600 list-disc pl-4 leading-relaxed">
+                            <li>12월 의회 청문회·SEC 조사가 장기 법적 분쟁으로 이어지나 즉각적 사업 제재는 회피</li>
+                            <li>연준 12월 금리 동결(국채 5.0% 정점 통과) 및 2027년 1분기 내 후임 CEO 윤곽</li>
+                            <li>$135~$145 구간 자사주 매입 유입 후 $153.50 돌파 → $168~$174 안착 후 $183~$186 테스트</li>
+                        </ul>
+                    </div>
+                    <div class="mt-5 pt-3 border-t border-slate-100 text-xs">
+                        <span class="font-bold text-rose-600">무효화 조건:</span> 종가 $132 이탈 또는 중대 제재 발표
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 border-t-4 border-t-[#10B981] flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="px-2.5 py-1 rounded-full bg-[#10B981] text-white text-xs font-bold">강세 시나리오 (25%)</span>
+                            <span class="text-xs font-bold text-slate-500">PER 12.4x – 14.8x+</span>
+                        </div>
+                        <h4 class="text-xl font-black text-[#0B192C] mb-1">$195 – $230+ V자 반등</h4>
+                        <p class="text-xs text-[#10B981] font-semibold mb-4">리더십 조기 안정 및 숏스퀴즈</p>
+                        <ul class="space-y-2 text-xs text-slate-600 list-disc pl-4 leading-relaxed">
+                            <li>이사회 독립 조사 '안보 유출 없음' 종결 및 검증된 CEO 조기 선임(또는 황 전 CEO 자문 복귀)</li>
+                            <li>미 10년물 금리 4.5~4.8% 하향 안정 및 상무부 12개국 규정 온건 확정</li>
+                            <li>$150·$160 돌파 시 음의 감마 숏스퀴즈 발생 → 200일선($203~$210) 회복 후 $220~$230 재시험</li>
+                        </ul>
+                    </div>
+                    <div class="mt-5 pt-3 border-t border-slate-100 text-xs">
+                        <span class="font-bold text-rose-600">무효화 조건:</span> 12월 FOMC 금리 인상 및 빅테크 CapEx 삭감
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 border-t-4 border-t-[#FF3366] flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="px-2.5 py-1 rounded-full bg-[#FF3366] text-white text-xs font-bold">약세 시나리오 (25%)</span>
+                            <span class="text-xs font-bold text-slate-500">PER 7.0x – 8.5x</span>
+                        </div>
+                        <h4 class="text-xl font-black text-[#0B192C] mb-1">$108 – $132 추가 조정</h4>
+                        <p class="text-xs text-[#FF3366] font-semibold mb-4">규제 제재 + 금리·CapEx 쇼크</p>
+                        <ul class="space-y-2 text-xs text-slate-600 list-disc pl-4 leading-relaxed">
+                            <li>SEC/DOJ 조사에서 수출통제 위반·공시 오류 적발(대규모 과징금 및 12개국 라이선스 차단)</li>
+                            <li>12월 연준 금리 인상(10년물 5.3%+ 돌파) 및 FCF 적자 빅테크의 2027년 GPU 발주 축소</li>
+                            <li>$144~$145 붕괴 후 볼린저 하단($135) 관통 → DCF 약세($128~$132) 및 최악 시 $108~$116 하락</li>
+                        </ul>
+                    </div>
+                    <div class="mt-5 pt-3 border-t border-slate-100 text-xs">
+                        <span class="font-bold text-emerald-600">무효화 조건:</span> $160 이상 주간 종가 안착
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 sm:p-8 bg-gradient-to-r from-[#0B192C] to-[#002B6B] text-white">
+                <h3 class="text-xl font-black mb-2 flex items-center gap-2">
+                    <span class="text-[#00E5FF]">📅</span> 향후 핵심 이벤트 타임라인 & 실전 점검 체크리스트
+                </h3>
+                <p class="text-xs sm:text-sm text-blue-200 mb-6">
+                    단기 저가 매수는 $144~$145 종가 지지 확인 후 분할 접근이 유효하며, 추세 추종 매수는 $149.26(Gamma Flip)~$153.50 안착 이후가 손익비 측면에서 유리합니다.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
+                        <span class="inline-block text-xs font-bold text-[#00E5FF] mb-1">2026년 11월 20일</span>
+                        <h4 class="font-bold text-sm mb-1.5">월간 옵션 만기 청산</h4>
+                        <p class="text-xs text-blue-100 leading-relaxed">
+                            맥스 페인($180)과 현 주가 간 극심한 괴리. 만기 청산 이후 음의 감마 압력 완화 및 $145 방어 여부 확인.
+                        </p>
+                    </div>
+
+                    <div class="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
+                        <span class="inline-block text-xs font-bold text-[#FF8800] mb-1">2026년 12월 1~3일</span>
+                        <h4 class="font-bold text-sm mb-1.5">미 의회 증언 및 브리핑</h4>
+                        <p class="text-xs text-blue-100 leading-relaxed">
+                            12/1 젠슨 황 하원 비공개 인터뷰, 12/2 콜레트 크레스 하원 브리핑, 12/3 상원 은행위 출석 요구 등 규제 수위 점검.
+                        </p>
+                    </div>
+
+                    <div class="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
+                        <span class="inline-block text-xs font-bold text-[#00E5FF] mb-1">2026년 12월 9일</span>
+                        <h4 class="font-bold text-sm mb-1.5">브로드컴(AVGO) 실적</h4>
+                        <p class="text-xs text-blue-100 leading-relaxed">
+                            하이퍼스케일러의 자체 커스텀 ASIC 발주 증가 속도와 엔비디아 GPU 점유율 잠식 강도를 가늠하는 분수령.
+                        </p>
+                    </div>
+
+                    <div class="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
+                        <span class="inline-block text-xs font-bold text-[#10B981] mb-1">2026년 12월 중순</span>
+                        <h4 class="font-bold text-sm mb-1.5">12월 FOMC & 월간 만기</h4>
+                        <p class="text-xs text-blue-100 leading-relaxed">
+                            연준 금리 동결/인상 여부와 미 10년물 국채금리 5% 선 안착 여부, 12/18 옵션 만기(Max Pain $170) 수급 확인.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#0B192C] text-slate-400 py-8 px-4 sm:px-6 lg:px-8 border-t border-white/10 text-xs">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <p class="font-bold text-white">엔비디아(NVDA) 기술적·펀더멘털 심층 분석 인포그래픽</p>
+                <p class="mt-1">기준 시점: 2026년 11월 19일 미국 정규장 마감 및 장후 호가 데이터 반영</p>
+            </div>
+            <p class="text-slate-500 text-center sm:text-right">
+                본 자료는 정보 제공을 목적으로 작성되었으며 투자 결과에 대한 법적 책임을 지지 않습니다.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        function wrapLabel(label, maxChars = 16) {
+            if (typeof label !== 'string' || label.length <= maxChars) return label;
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+
+            words.forEach(word => {
+                if ((currentLine + (currentLine ? ' ' : '') + word).length <= maxChars) {
+                    currentLine += (currentLine ? ' ' : '') + word;
+                } else {
+                    if (currentLine) lines.push(currentLine);
+                    currentLine = word;
+                }
+            });
+            if (currentLine) lines.push(currentLine);
+            return lines;
+        }
+
+        const commonTooltipPlugin = {
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    } else {
+                        return label;
+                    }
+                }
+            }
+        };
+
+        Chart.defaults.font.family = "'Noto Sans KR', sans-serif";
+        Chart.defaults.color = '#475569';
+
+        const ctxEarnings = document.getElementById('earningsChart').getContext('2d');
+        new Chart(ctxEarnings, {
+            type: 'bar',
+            data: {
+                labels: [
+                    wrapLabel('Q3 FY27 총매출 (억 달러)'),
+                    wrapLabel('Q3 데이터센터 매출 (억 달러)'),
+                    wrapLabel('Q4 FY27 매출 가이던스 (억 달러)')
+                ],
+                datasets: [
+                    {
+                        label: '월가 컨센서스',
+                        data: [1091.5, 1012.0, 1251.0],
+                        backgroundColor: '#94A3B8',
+                        borderRadius: 6
+                    },
+                    {
+                        label: '실제 발표 / 가이던스',
+                        data: [1158.0, 1076.0, 1300.0],
+                        backgroundColor: '#0066FF',
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: commonTooltipPlugin,
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#E2E8F0' },
+                        ticks: { callback: val => '$' + val + '억' }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        const ctxLevels = document.getElementById('levelsChart').getContext('2d');
+        const levelLabels = [
+            'R5 장기추세 (200일선·매물대)',
+            'R4 중기반전 (20일선·피보38.2%)',
+            'R3 1차관문 (피보23.6%·MaxPain)',
+            'R2 반등실패 (11/18고점·Call$160)',
+            'R1 즉각저항 (전저점·GammaFlip)',
+            '현재가 기준 (11/19 종가)',
+            'S1 최전방방어 (PutWall·장중저점)',
+            'S2 기술적반발 (볼린저하단)',
+            'S3 가치바닥 (DCF약세·최저목표)',
+            'S4 최종항복 (파동1.618·25년저점)'
+        ].map(l => wrapLabel(l, 18));
+
+        new Chart(ctxLevels, {
+            type: 'bar',
+            data: {
+                labels: levelLabels,
+                datasets: [{
+                    label: '가격 구간 (USD)',
+                    data: [
+                        [200.0, 210.0],
+                        [183.0, 189.0],
+                        [168.5, 174.0],
+                        [158.1, 160.5],
+                        [148.8, 153.5],
+                        [144.66, 146.69],
+                        [144.0, 145.7],
+                        [135.0, 138.0],
+                        [128.0, 132.5],
+                        [108.0, 120.0]
+                    ],
+                    backgroundColor: [
+                        '#991B1B',
+                        '#DC2626',
+                        '#EF4444',
+                        '#F97316',
+                        '#FF8800',
+                        '#0B192C',
+                        '#0066FF',
+                        '#0284C7',
+                        '#00E5FF',
+                        '#10B981'
+                    ],
+                    borderRadius: 6,
+                    barPercentage: 0.72
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: commonTooltipPlugin.callbacks.title,
+                            label: function(ctx) {
+                                const raw = ctx.raw;
+                                return `구간: $${raw[0].toFixed(2)} – $${raw[1].toFixed(2)}`;
+                            }
+                        }
+                    },
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        min: 100,
+                        max: 225,
+                        grid: { color: '#E2E8F0' },
+                        ticks: { callback: val => '$' + val }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11 } }
+                    }
+                }
+            }
+        });
+
+        const ctxGex = document.getElementById('gexChart').getContext('2d');
+        new Chart(ctxGex, {
+            type: 'bar',
+            data: {
+                labels: ['$135 행사가', '$140 행사가', '$145 Put Wall', '$150 Call Wall', '$160 상단 GEX'],
+                datasets: [{
+                    label: '순 감마 노출 (Net GEX, $K)',
+                    data: [-73, -253, -308, -120, 210],
+                    backgroundColor: ctx => ctx.raw < 0 ? '#FF3366' : '#10B981',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: commonTooltipPlugin,
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        grid: { color: '#E2E8F0' },
+                        ticks: { callback: val => val + 'K' }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        const ctxValuation = document.getElementById('valuationChart').getContext('2d');
+        new Chart(ctxValuation, {
+            type: 'bar',
+            data: {
+                labels: [
+                    wrapLabel('엔비디아 (FY28E 기준)'),
+                    wrapLabel('TSMC (파운드리)'),
+                    wrapLabel('엔비디아 (TTM 후행)'),
+                    wrapLabel('S&P 500 지수 평균'),
+                    wrapLabel('브로드컴 (AVGO 평균)'),
+                    wrapLabel('AMD (선행 PER)')
+                ],
+                datasets: [{
+                    label: '선행 PER 배수 (배)',
+                    data: [9.35, 15.5, 15.7, 20.0, 24.6, 30.1],
+                    backgroundColor: [
+                        '#0066FF',
+                        '#64748B',
+                        '#00E5FF',
+                        '#94A3B8',
+                        '#FF8800',
+                        '#FF3366'
+                    ],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: commonTooltipPlugin,
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#E2E8F0' },
+                        ticks: { callback: val => val + 'x' }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        const ctxTarget = document.getElementById('targetPriceChart').getContext('2d');
+        new Chart(ctxTarget, {
+            type: 'bar',
+            data: {
+                labels: [
+                    wrapLabel('월가 최하단 목표가'),
+                    wrapLabel('현재 주가 (11/19)'),
+                    wrapLabel('트루이스트 (Hold 하향)'),
+                    wrapLabel('번스타인 (하향 조정)'),
+                    wrapLabel('JP모건 (상향 조정)'),
+                    wrapLabel('컨센서스 평균 목표가'),
+                    wrapLabel('웨드부시 (상향 조정)')
+                ],
+                datasets: [{
+                    label: '목표주가 (USD)',
+                    data: [130, 145.98, 174, 200, 230, 255.9, 293],
+                    backgroundColor: [
+                        '#94A3B8',
+                        '#0B192C',
+                        '#FF8800',
+                        '#FF8800',
+                        '#0066FF',
+                        '#10B981',
+                        '#00E5FF'
+                    ],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: commonTooltipPlugin,
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#E2E8F0' },
+                        ticks: { callback: val => '$' + val }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        const plotlyData = [
+            {
+                type: 'bar',
+                orientation: 'h',
+                name: '약세 시나리오 (25%)',
+                y: ['약세 시나리오 (25%)', '기본 시나리오 (50%)', '강세 시나리오 (25%)'],
+                x: [24, 50, 35],
+                base: [108, 135, 195],
+                marker: {
+                    color: ['#FF3366', '#0066FF', '#10B981'],
+                    opacity: 0.85,
+                    line: { color: ['#BE123C', '#003380', '#047857'], width: 2 }
+                },
+                text: ['$108 – $132 (PER 7.0~8.5x)', '$135 – $185 (PER 8.6~11.9x)', '$195 – $230+ (PER 12.4~14.8x)'],
+                textposition: 'inside',
+                insidetextanchor: 'middle',
+                textfont: { color: '#FFFFFF', weight: 'bold', size: 12 },
+                hovertemplate: '<b>%{y}</b><br>예상 밴드: %{text}<extra></extra>'
+            }
+        ];
+
+        const plotlyLayout = {
+            margin: { l: 140, r: 30, t: 20, b: 40 },
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            xaxis: {
+                range: [95, 250],
+                tickprefix: '$',
+                gridcolor: '#E2E8F0',
+                title: { text: '예상 주가 범위 (USD)', font: { size: 12, color: '#475569' } }
+            },
+            yaxis: {
+                gridcolor: 'rgba(0,0,0,0)',
+                tickfont: { size: 12, color: '#0B192C', weight: 'bold' }
+            },
+            shapes: [
+                {
+                    type: 'line',
+                    x0: 145.98,
+                    x1: 145.98,
+                    y0: -0.5,
+                    y1: 2.5,
+                    line: { color: '#0B192C', width: 2.5, dash: 'dash' }
+                }
+            ],
+            annotations: [
+                {
+                    x: 145.98,
+                    y: 2.45,
+                    text: '현재가 $145.98',
+                    showarrow: true,
+                    arrowhead: 2,
+                    ax: 45,
+                    ay: -15,
+                    font: { color: '#0B192C', size: 11, weight: 'bold' },
+                    bgcolor: '#F8FAFC',
+                    bordercolor: '#0B192C',
+                    borderwidth: 1,
+                    borderpad: 3
+                }
+            ],
+            showlegend: false
+        };
+
+        Plotly.newPlot('plotlyScenarioChart', plotlyData, plotlyLayout, { responsive: true, displayModeBar: false });
+    </script>
+</body>
+</html>
